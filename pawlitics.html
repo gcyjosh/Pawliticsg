@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pawlitics — What our government sets for fur-kids</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EC; --cream-dark: #F5EBD8;
+    --green-deep: #1E3A1E; --green-mid: #2D5A1B;
+    --amber: #D4870A; --amber-light: #F5A623;
+    --text-dark: #1A2014; --text-mid: #3D4F36; --text-light: #6B7C60;
+    --border: #D8CBB3;
+    --cat: #E8593A; --dog: #2A9D8F; --bird: #B8820A;
+    --fish: #4895EF; --rodent: #9B59B6; --others: #52B788;
+    --shadow-soft: 0 4px 24px rgba(30,58,30,0.08);
+    --shadow-card: 0 2px 12px rgba(30,58,30,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
+
+  header { background: var(--green-deep); padding: 0 48px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--amber); display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { font-size: 26px; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: #fff; }
+  .logo-text span { color: var(--amber-light); }
+  .data-badge { font-size: 11px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 6px; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #52B788; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero { background: var(--green-deep); padding: 52px 48px 60px; position: relative; overflow: hidden; }
+  .hero::after { content: '🐾'; position: absolute; bottom: -10px; right: 48px; font-size: 160px; opacity: 0.04; pointer-events: none; }
+  .hero-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--amber-light); font-weight: 600; margin-bottom: 12px; font-family: 'DM Mono', monospace; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4.5vw, 48px); font-weight: 900; color: #fff; line-height: 1.1; max-width: 600px; margin-bottom: 14px; }
+  .hero-title em { font-style: italic; color: var(--amber-light); }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.55); max-width: 520px; line-height: 1.65; font-weight: 300; }
+  .hero-stats { display: flex; gap: 32px; margin-top: 36px; padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #fff; }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  #loading-screen { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; }
+  .loading-paw { font-size: 48px; animation: bounce2 1s infinite; }
+  @keyframes bounce2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .loading-text { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--green-deep); }
+  .loading-sub { font-size: 13px; color: var(--text-light); }
+
+  #error-banner { display: none; background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; padding: 16px 24px; font-size: 14px; line-height: 1.6; border-radius: 8px; margin: 24px 48px; }
+  #error-banner code { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  .filters-section { background: var(--cream-dark); border-bottom: 1px solid var(--border); padding: 20px 48px; position: sticky; top: 64px; z-index: 90; display: flex; flex-direction: column; gap: 14px; }
+  .filters-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 400px; }
+  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.4; pointer-events: none; }
+  .search-input { width: 100%; padding: 9px 13px 9px 38px; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); outline: none; transition: border-color 0.2s; }
+  .search-input::placeholder { color: var(--text-light); }
+  .search-input:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,90,27,0.1); }
+  .select-wrap { position: relative; }
+  .filter-select { appearance: none; padding: 9px 34px 9px 13px; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); outline: none; cursor: pointer; min-width: 190px; }
+  .filter-select:focus { border-color: var(--green-mid); }
+  .select-arrow { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: var(--text-light); }
+  .chips-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .chips-label { font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-right: 2px; }
+  .chip { padding: 5px 13px; border-radius: 100px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: #fff; color: var(--text-mid); transition: all 0.15s; display: flex; align-items: center; gap: 5px; user-select: none; }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+  .chip.active-all    { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+  .chip.active-cat    { background: var(--cat);    border-color: var(--cat);    color: #fff; }
+  .chip.active-dog    { background: var(--dog);    border-color: var(--dog);    color: #fff; }
+  .chip.active-bird   { background: var(--bird);   border-color: var(--bird);   color: #fff; }
+  .chip.active-fish   { background: var(--fish);   border-color: var(--fish);   color: #fff; }
+  .chip.active-rodent { background: var(--rodent); border-color: var(--rodent); color: #fff; }
+  .chip.active-others { background: var(--others); border-color: var(--others); color: #fff; }
+
+  main { max-width: 1160px; margin: 0 auto; padding: 36px 48px 80px; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .results-count { font-size: 13px; color: var(--text-light); font-weight: 500; }
+  .results-count strong { color: var(--text-dark); }
+  .sort-info { font-size: 12px; color: var(--text-light); font-family: 'DM Mono', monospace; }
+  #speeches-container { display: grid; gap: 15px; }
+
+  .speech-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 22px 26px; box-shadow: var(--shadow-card); transition: box-shadow 0.2s, transform 0.15s; position: relative; overflow: hidden; animation: fadeInUp 0.3s ease both; }
+  .speech-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 12px 0 0 12px; }
+  .speech-card[data-type="cat"]::before    { background: var(--cat); }
+  .speech-card[data-type="dog"]::before    { background: var(--dog); }
+  .speech-card[data-type="bird"]::before   { background: var(--bird); }
+  .speech-card[data-type="fish"]::before   { background: var(--fish); }
+  .speech-card[data-type="rodent"]::before { background: var(--rodent); }
+  .speech-card[data-type="others"]::before { background: var(--others); }
+  .speech-card:hover { box-shadow: var(--shadow-soft); transform: translateY(-2px); }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+  .card-meta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .card-date { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-light); background: var(--cream-dark); padding: 3px 8px; border-radius: 4px; }
+  .pet-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pet-tag-cat    { background: rgba(232,89,58,0.1);  color: var(--cat); }
+  .pet-tag-dog    { background: rgba(42,157,143,0.1); color: var(--dog); }
+  .pet-tag-bird   { background: rgba(184,130,10,0.12); color: var(--bird); }
+  .pet-tag-fish   { background: rgba(72,149,239,0.1); color: var(--fish); }
+  .pet-tag-rodent { background: rgba(155,89,182,0.1); color: var(--rodent); }
+  .pet-tag-others { background: rgba(82,183,136,0.1); color: var(--others); }
+  .card-hansard-link { font-size: 12px; color: var(--green-mid); text-decoration: none; display: flex; align-items: center; gap: 4px; font-weight: 500; white-space: nowrap; padding: 4px 10px; border: 1px solid rgba(45,90,27,0.2); border-radius: 6px; transition: all 0.15s; flex-shrink: 0; }
+  .card-hansard-link:hover { background: var(--green-mid); color: #fff; border-color: var(--green-mid); }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text-dark); line-height: 1.3; margin-bottom: 5px; }
+  .card-speaker { font-size: 13px; color: var(--text-light); margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .card-speaker::before { content: '👤'; font-size: 11px; }
+  .card-excerpt { font-size: 14px; color: var(--text-mid); line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Summary box — shown if ai_summary exists */
+  .summary-box { margin-top: 14px; border-top: 1px solid var(--cream-dark); padding-top: 12px; }
+  .summary-label { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+  .summary-text { font-size: 13.5px; line-height: 1.7; color: var(--text-mid); background: linear-gradient(135deg, #FFFBF3, #F8F3E8); border: 1px solid rgba(212,135,10,0.2); border-radius: 8px; padding: 12px 14px; }
+
+  .empty { text-align: center; padding: 72px 40px; color: var(--text-light); }
+  .empty .icon { font-size: 44px; margin-bottom: 14px; }
+  .empty h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text-mid); margin-bottom: 8px; }
+
+  footer { background: var(--green-deep); color: rgba(255,255,255,0.45); text-align: center; padding: 24px 48px; font-size: 12px; line-height: 1.8; }
+  footer a { color: var(--amber-light); text-decoration: none; }
+  footer strong { color: rgba(255,255,255,0.75); }
+
+  @media (max-width: 768px) {
+    header, .filters-section, .hero, footer { padding-left: 20px; padding-right: 20px; }
+    main { padding: 20px 20px 60px; }
+    .card-top { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loading-paw">🐾</div>
+  <div class="loading-text">Loading parliament speeches…</div>
+  <div class="loading-sub">Reading data/speeches.json</div>
+</div>
+
+<header>
+  <div class="logo-wrap">
+    <span class="logo-icon">🐾</span>
+    <div class="logo-text">Paw<span>litics</span></div>
+  </div>
+  <div class="data-badge">
+    <span class="live-dot"></span>
+    <span id="data-timestamp">—</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Singapore Parliament · Pet Policy Tracker</div>
+  <h1 class="hero-title">What our government sets<br>for our <em>fur-kids</em></h1>
+  <p class="hero-sub">Tracking parliament readings from the Hansard on pet-related legislation — filtered by animal type, so every pet owner in Singapore can stay informed.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num" id="stat-total">—</span><span class="stat-label">Speeches Tracked</span></div>
+    <div class="stat"><span class="stat-num">32%</span><span class="stat-label">Singaporeans Own Pets</span></div>
+    <div class="stat"><span class="stat-num" id="stat-sessions">—</span><span class="stat-label">Parliament Sessions</span></div>
+    <div class="stat"><span class="stat-num" id="stat-summarised">—</span><span class="stat-label">With Summaries</span></div>
+  </div>
+</div>
+
+<div id="error-banner"></div>
+
+<div class="filters-section">
+  <div class="filters-row">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search-input" type="text" placeholder="Search speeches, speakers, topics…">
+    </div>
+    <div class="select-wrap">
+      <select class="filter-select" id="date-filter">
+        <option value="all">All Parliament Sittings</option>
+      </select>
+      <span class="select-arrow">▼</span>
+    </div>
+  </div>
+  <div class="chips-row">
+    <span class="chips-label">Filter:</span>
+    <button class="chip active-all" data-filter="all">🐾 All</button>
+    <button class="chip" data-filter="cat">🐱 Cats</button>
+    <button class="chip" data-filter="dog">🐶 Dogs</button>
+    <button class="chip" data-filter="bird">🐦 Birds</button>
+    <button class="chip" data-filter="fish">🐟 Fish</button>
+    <button class="chip" data-filter="rodent">🐹 Rodents</button>
+    <button class="chip" data-filter="others">🦎 Others</button>
+  </div>
+</div>
+
+<main>
+  <div class="results-header">
+    <div class="results-count" id="results-count"></div>
+    <div class="sort-info">newest first</div>
+  </div>
+  <div id="speeches-container"></div>
+</main>
+
+<footer>
+  <p><strong>Pawlitics</strong> — A civil society project by Goh Ching Yang, Josh</p>
+  <p>Data from the <a href="https://sprs.parl.gov.sg" target="_blank">Singapore Parliament Hansard</a> &nbsp;·&nbsp; Not affiliated with the Singapore Government</p>
+</footer>
+
+<script>
+const PET_EMOJI  = { cat:"🐱", dog:"🐶", bird:"🐦", fish:"🐟", rodent:"🐹", others:"🦎" };
+const PET_LABEL  = { cat:"Cat", dog:"Dog", bird:"Bird", fish:"Fish", rodent:"Rodent", others:"Others" };
+
+let allSpeeches  = [];
+let activeFilter = "all";
+let searchQuery  = "";
+let dateFilter   = "all";
+
+async function boot() {
+  try {
+    const res = await fetch("data/speeches.json");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allSpeeches = data.speeches || [];
+
+    const ts = data.meta?.generated_at
+      ? new Date(data.meta.generated_at).toLocaleDateString("en-SG", {day:"numeric",month:"short",year:"numeric"})
+      : "Unknown";
+    document.getElementById("data-timestamp").textContent = `Data: ${ts}`;
+    document.getElementById("stat-total").textContent = allSpeeches.length;
+    document.getElementById("stat-sessions").textContent = new Set(allSpeeches.map(s=>s.sitting_id)).size;
+    document.getElementById("stat-summarised").textContent = allSpeeches.filter(s=>s.ai_summary).length;
+
+    const sel = document.getElementById("date-filter");
+    [...new Set(allSpeeches.map(s=>s.sitting_id))].sort((a,b)=>b.localeCompare(a)).forEach(d => {
+      const sp = allSpeeches.find(s=>s.sitting_id===d);
+      const opt = document.createElement("option");
+      opt.value = d; opt.textContent = sp?.sitting || d;
+      sel.appendChild(opt);
+    });
+
+    document.querySelectorAll(".chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeFilter = btn.dataset.filter;
+        document.querySelectorAll(".chip").forEach(c => c.className = "chip");
+        btn.classList.add("active-" + activeFilter);
+        render();
+      });
+    });
+    document.getElementById("search-input").addEventListener("input", e => { searchQuery = e.target.value.toLowerCase().trim(); render(); });
+    document.getElementById("date-filter").addEventListener("change", e => { dateFilter = e.target.value; render(); });
+
+    document.getElementById("loading-screen").style.display = "none";
+    render();
+
+  } catch(err) {
+    document.getElementById("loading-screen").style.display = "none";
+    const b = document.getElementById("error-banner");
+    b.style.display = "block";
+    b.innerHTML = `<strong>⚠️ Could not load speech data.</strong><br>Make sure <code>data/speeches.json</code> exists and run <code>python3 -m http.server 8080</code> from the pawlitics folder.<br><small>${err.message}</small>`;
+  }
+}
+
+function getFiltered() {
+  return allSpeeches.filter(s => {
+    const matchType   = activeFilter === "all" || s.type === activeFilter;
+    const matchDate   = dateFilter   === "all" || s.sitting_id === dateFilter;
+    const q = searchQuery;
+    const matchSearch = !q || [s.title, s.speaker, s.excerpt, s.sitting].some(f => (f||"").toLowerCase().includes(q));
+    return matchType && matchDate && matchSearch;
+  });
+}
+
+function hl(text) {
+  if (!searchQuery || !text) return text || "";
+  const rx = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi");
+  return text.replace(rx, `<mark style="background:rgba(212,135,10,0.25);border-radius:2px;padding:0 2px;">$1</mark>`);
+}
+
+function esc(str) {
+  return (str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function render() {
+  const filtered = getFiltered();
+  document.getElementById("results-count").innerHTML = `Showing <strong>${filtered.length}</strong> of ${allSpeeches.length} speeches`;
+  const container = document.getElementById("speeches-container");
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty"><div class="icon">🔍</div><h3>No speeches found</h3><p>Try adjusting your filters or search term.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(s => {
+    const summaryHtml = s.ai_summary ? `
+      <div class="summary-box">
+        <div class="summary-label">✨ AI Summary</div>
+        <div class="summary-text">${esc(s.ai_summary)}</div>
+      </div>` : "";
+
+    return `
+    <div class="speech-card" data-type="${s.type}">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-date">${s.sitting}</span>
+          <span class="pet-tag pet-tag-${s.type}">${PET_EMOJI[s.type]||"🐾"} ${PET_LABEL[s.type]||s.type}</span>
+        </div>
+        <a class="card-hansard-link" href="${s.hansard_url}" target="_blank" rel="noopener">📄 View Hansard ↗</a>
+      </div>
+      <div class="card-title">${hl(s.title)}</div>
+      <div class="card-speaker">${hl(s.speaker)}</div>
+      <div class="card-excerpt">${hl(esc(s.excerpt))}</div>
+      ${summaryHtml}
+    </div>`;
+  }).join("");
+}
+
+boot();
+</script>
+</body>
+</html>
